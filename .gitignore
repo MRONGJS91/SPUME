@@ -1,3 +1,9 @@
+*.ipynb
+__pycache__
+*.out
+*.svg
+*.sh
+.vscode
 # Python
 __pycache__/
 *.py[cod]
@@ -16,14 +22,13 @@ __pycache__/
 *.aux
 *.toc
 *.out
-*.log
 *.blg
 *.bbl
 tex_build/
 tex_build2/
 tmp_build/
 
-# Temporary fix scripts (not part of the project)
+# Temporary fix scripts
 fix_*.py
 add_*.py
 check_cites.py
@@ -39,19 +44,11 @@ desktop.ini
 .vscode/
 .idea/
 
-# Datasets - exclude raw images but keep metadata
+# Datasets - exclude raw images
 datasets/*/images/
 datasets/*/downloads/
 *.zip
-
-# Waterbirds dataset (external)
 waterbird_complete95_forest2water2/
-
-# Spawrious dataset (external)
 spawrious224__*/
-
-# Figures generated externally (keep essential ones)
-figures/top_spurious_blip.png
-figures/top_spurious_vitgpt2.png
 how_to_run/
 vit-gpt2-model/

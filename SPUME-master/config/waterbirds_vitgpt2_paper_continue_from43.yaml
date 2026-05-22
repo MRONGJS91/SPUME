@@ -1,0 +1,50 @@
+use_val: False
+use_group_label: False
+fast_train: 0
+random_sampler: False
+pretrained: True
+test: False
+
+batch_size: 8
+num_supp: 10
+num_query: 10
+topk: 1
+num_epochs: 100
+num_episode: 80
+task_num: 1
+n_classes: 2
+
+vlm: "vit-gpt2"
+dataset: "waterbirds"
+backbone: "resnet50"
+score_func: "tanh-abs-log"
+scheduler: "cosine"
+milestones: [20, 40, 60, 80]
+gamma: 0.2
+alpha: 1.0
+lr: 1.e-3
+augmentation: True
+temp: 5.0
+val_threshold_num: 50
+tag: "paper_fullrun"
+
+save_folder: "d:/SPUME/how_to_run/meta_spurious_exprs/"
+data_folder: "d:/SPUME/waterbird_complete95_forest2water2"
+vit_gpt2_attr_embed_path: "d:/SPUME/waterbird_complete95_forest2water2/images/vit-gpt2_img_embeddings.pickle"
+vit_gpt2_vocab_path: "d:/SPUME/waterbird_complete95_forest2water2/images/vit-gpt2_vocab.pickle"
+blip_attr_embed_path: ""
+blip_vocab_path: ""
+num_workers: 0
+meta_chunk_size: 2
+amp: True
+use_checkpoint: True
+
+# Closest possible continuation after the original run was stopped at epoch 43
+# without a full optimizer/scheduler checkpoint. We resume from the best
+# Accpu-selected model, which matches the paper's model selection intent.
+resume_model_ckpt: "d:/SPUME/how_to_run/meta_spurious_exprs/waterbirds_resnet50_lr_0.001000_train_8B_1topK_10ns_10nq_100Epochs_80Epi_1T_vit-gpt2_5.00temp_1.0alpha_tanh-abs-log_cosine_scheduler_imagenet_weights_paper_fullrun/pseudo_unbiased_model.pt"
+resume_start_epoch: 44
+resume_best_worst_acc: 0.8571
+resume_best_worst_acc_psu: 0.8492
+resume_best_avg_acc: 0.9366
+resume_best_unbiased_pseudo: 0.9085

@@ -1,0 +1,990 @@
+                                                                                                                                  PDF Download
+                                                                                                                                  3637528.3672006.pdf
+                                                                                                                                  02 March 2026
+                                                                                                                                  Total Citations: 1
+                                                                                                                                  Total Downloads: 445
+    .
+    .
+        Latest updates: hps://dl.acm.org/doi/10.1145/3637528.3672006
+
+
+
+
+                                                                                                                                  .
+                                                                                                                                  .
+                                                                                                                        Published: 24 August 2024
+        .
+        .
+                                                                                                                        .
+    RESEARCH-ARTICLE
+
+
+
+
+                                                                                                                        .
+                                                                                                                        Citation in BibTeX format
+    Spuriousness-Aware Meta-Learning for Learning Robust Classifiers
+
+
+
+
+                                                                                                                        .
+                                                                                                                        .
+                                                                                                                        KDD '24: The 30th ACM SIGKDD
+                                                                                                                        Conference on Knowledge Discovery and
+    GUANGTAO ZHENG, University of Virginia, Charloesville, VA, United States                                           Data Mining
+    .
+                                                                                                                        August 25 - 29, 2024
+    WENQIAN YE, University of Virginia, Charloesville, VA, United States                                               Barcelona, Spain
+    .
+                                                                                                                        .
+    AIDONG ZHANG, University of Virginia, Charloesville, VA, United States
+
+
+
+
+                                                                                                                        .
+                                                                                                                        Conference Sponsors:
+                                                                                                                        SIGMOD
+    .
+    .
+                                                                                                                        SIGKDD
+    .
+    Open Access Support provided by:
+    .
+    University of Virginia
+    .
+                                                 KDD '24: Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining (August 2024)
+                                                                                                                       hps://doi.org/10.1145/3637528.3672006
+                                                                                                                                          ISBN: 9798400704901
+.
+          Spuriousness-Aware Meta-Learning for Learning Robust
+                              Classifiers
+                Guangtao Zheng                                              Wenqian Ye                                         Aidong Zhang
+              University of Virginia                                  University of Virginia                                University of Virginia
+             Charlottesville, VA, USA                                Charlottesville, VA, USA                              Charlottesville, VA, USA
+               gz5hp@virginia.edu                                     wenqian@virginia.edu                                  aidong@virginia.edu
+
+ABSTRACT                                                                                    30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining
+Spurious correlations are brittle associations between certain at-                          (KDD ’24), August 25–29, 2024, Barcelona, Spain. ACM, New York, NY, USA,
+                                                                                            12 pages. https://doi.org/10.1145/3637528.3672006
+tributes of inputs and target variables, such as the correlation be-
+tween an image background and an object class. Deep image classi-
+fiers often leverage them for predictions, leading to poor generaliza-
+tion on the data where the correlations do not hold. Mitigating the                         1    INTRODUCTION
+impact of spurious correlations is crucial towards robust model gen-                        Spurious correlations are prevalent in real-world datasets. They are
+eralization, but it often requires annotations of the spurious correla-                     brittle associations between certain input attributes and the corre-
+tions in data – a strong assumption in practice. In this paper, we pro-                     sponding target variables. For example, the class cow is correlated
+pose a novel learning framework based on meta-learning, termed                              with grassland when most training images show a cow on a grass-
+SPUME – SPUriousness-aware MEta-learning, to train an image                                 land, but the correlation breaks when a cow is at a beach [5, 15]. The
+classifier to be robust to spurious correlations. We design the frame-                      grassland feature is spurious as it does not always correlate with
+work to iteratively detect and mitigate the spurious correlations                           the label cow and is not truly predictive for all cow images. Deep
+that the classifier excessively relies on for predictions. To achieve                       image classifiers often use spurious correlations as their prediction
+this, we first propose to utilize a pre-trained vision-language model                       shortcuts [15], such as inferring an image as representing a cow by
+to extract text-format attributes from images. These attributes en-                         focusing on the grassland background of the image. Although this
+able us to curate data with various class-attribute correlations, and                       shortcut learning strategy can achieve high overall performance
+we formulate a novel metric to measure the degree of these corre-                           when the majority of samples have spurious correlations, it gener-
+lations’ spuriousness. Then, to mitigate the reliance on spurious                           alizes poorly on samples where spurious correlations do not hold.
+correlations, we propose a meta-learning strategy in which the sup-                         Thus, mitigating the reliance on spurious correlations is crucial for
+port (training) sets and query (test) sets in tasks are curated with                        obtaining robust image classifiers.
+different spurious correlations that have high degrees of spurious-                            Existing approaches require annotations of spurious correlations
+ness. By meta-training the classifier on these spuriousness-aware                           or group labels, which separate data into multiple groups with
+meta-learning tasks, our classifier can learn to be invariant to the                        each containing samples of the same class and sharing the same
+spurious correlations. We demonstrate that our method is robust to                          attribute. For example, a group label (cow, grass field) represents all
+spurious correlations without knowing them a priori and achieves                            cow images with grass fields as the background. The group labels
+the best on five benchmark datasets with different robustness mea-                          are used to formulate new optimization objectives [42] or used for
+sures. Our code is available at https://github.com/gtzheng/SPUME.                           model selection and/or model fine-tuning [22, 24, 31, 32]. However,
+                                                                                            knowing the group labels in data requires expert knowledge and
+CCS CONCEPTS                                                                                costly human annotations, which cannot scale to large datasets.
+                                                                                            Completely removing the requirement for group labels while learn-
+• Computing methodologies → Machine learning algorithms;
+                                                                                            ing robust classifiers is also a challenging task since we have no
+Object recognition; Learning under covariate shift; Super-
+                                                                                            knowledge about what spurious correlations we need to mitigate.
+vised learning by classification.
+                                                                                               In this paper, we propose a novel learning framework to train
+                                                                                            an image classifier to be robust to spurious correlations without
+KEYWORDS
+                                                                                            the need of group labels. We design our framework to iteratively
+Spurious correlations, robustness, meta-learning, image classifica-                         detect and mitigate the spurious correlations that the classifier
+tion, vision-language models                                                                heavily relies on for predictions. To achieve this, we first propose
+ACM Reference Format:                                                                       an automatic spurious attribute detection method empowered by a
+Guangtao Zheng, Wenqian Ye, and Aidong Zhang. 2024. Spuriousness-                           pre-trained vision-language model (VLM). The VLM enables us to
+Aware Meta-Learning for Learning Robust Classifiers. In Proceedings of the                  detect text-format attributes which represent many similar pixel-
+                                                                                            level features and are interpretable to humans. These attributes
+                        This work is licensed under a Creative Commons Attribution          together with class labels can formulate various class-attribute
+                        International 4.0 License.                                          correlations which we may find to be spurious in data, and these
+                                                                                            correlations can cover many potential scenarios where an image
+KDD ’24, August 25–29, 2024, Barcelona, Spain                                               classifier fails to generalize because of its reliance on one or multiple
+© 2024 Copyright held by the owner/author(s).
+ACM ISBN 979-8-4007-0490-1/24/08                                                            of these spurious correlations. Therefore, to train a robust classifier
+https://doi.org/10.1145/3637528.3672006                                                     against spurious correlations in general without the guidance of
+
+
+
+
+                                                                                     4524
+KDD ’24, August 25–29, 2024, Barcelona, Spain                                                                Guangtao Zheng, Wenqian Ye, & Aidong Zhang
+
+
+group labels, we focus on mitigating the classifier’s reliance on the           robust model assisted with limited human supervision are also uti-
+detected correlations.                                                          lized for spurious attribute detection [34, 43]. Pre-specifying a set
+   However, it is not efficient to mitigate all of them with equal              of candidate spurious attributes for spurious attribute detection is
+importance, since among the detected correlations, some are trivial             also explored [51]. Our method of spurious attribute detection is
+for the classifier as the classifier is robust to them, while some              completely unsupervised. We exploit the prior knowledge in pre-
+may pose a great risk to the robustness of the classifier. Thus, we             trained VLMs and extract spurious attributes in interpretable text
+propose a novel spuriousness metric to quantify the spuriousness of             format without any human supervisions.
+the correlation between a detected attribute and a class label, which           Mitigating Spurious Correlations. Spurious correlations tend to
+measures a classifier’s reliance on these class-attribute correlations          bias a model’s predictions. There is a growing number of works on
+for predictions, with a larger value indicating a greater reliance              mitigating the impact of spurious correlations. Methods that aim to
+on the correlation. With the spuriousness metric, we can identify               balance data distributions [6, 11, 18] or to perform distributionally
+harmful spurious correlations.                                                  robust optimization [42] require knowing group labels which pro-
+   To train a robust classifier, we propose a SPUriousness-aware                vide information about the spurious correlations in data. Recent
+MEta-learning (termed SPUME) strategy. Unlike the classical set-                works aim to infer group labels to relax this requirement, such
+tings where only a few spurious correlations are known and needed               as identifying misclassified samples [29], clustering hidden repre-
+to be mitigated, our setting has numerous correlations established              sentations [58], invariant learning [10], or training a group label
+by the detected attributes and class labels, especially when the                estimator using a small set of data with group labels [32]. Kirichenko
+dataset that we use has rich features. Using meta-learning, we can              et al. [24] uses group-balanced validation data to retrain the last
+distribute the detected spurious correlations with high spurious-               layer of a model. All these methods still require group labels for the
+ness values into multiple meta-learning tasks by carefully curating             validation data for model selection, which is a strong assumption
+the data in those tasks. We exploit the support (training) and query            in practice. A recent work [2] uses masked data with interpretation
+(test) sets in a meta-learning task so that samples in the support              techniques to mitigate the impact of spurious correlations without
+and query sets have different spurious correlations. Such a task                the need of group labels. Our method automatically detects spuri-
+simulates a challenging learning scenario where the classifier will             ous correlations and uses them to construct spuriousness-aware
+perform poorly on the query set when it has a high reliance on                  learning tasks and to do model selection. Another line of works is
+the spurious correlations in the support set. By meta-training the              to use data augmentation, such as mixup [17, 51, 56] or selective
+classifier on these spuriousness-aware meta-learning tasks, our                 augmentation [53], to mitigate spurious bias in model training. Our
+classifier can learn to be invariant to the spurious correlations.              method is orthogonal to these approaches as we focus on learning
+   Our contributions are as follows:                                            robust classifiers with existing data.
+                                                                                Meta-learning. Meta-learning [14, 41, 44, 48] is a bi-level learning
+     • We propose an automatic method to detect spurious correla-
+                                                                                paradigm and is popular in few-shot learning [8, 37, 45, 54]. It
+       tions in data, which exploits the prior knowledge contained
+                                                                                aims to learn from one set of data and to generalize on another set
+       in a pre-trained VLM and extracts spurious attributes in
+                                                                                of data. It has been found that the meta-learning can learn high-
+       interpretable text format.
+                                                                                quality representations [40], achieving good generalization across
+     • We tackle the problem of mitigating the reliance on spurious
+                                                                                different tasks. Utilizing the novel idea of meta-learning, in this
+       correlations with a novel meta-learning strategy.
+                                                                                paper, we transform the problem of spurious correlation mitigation
+     • We propose a novel spuriousness metric to guide the con-
+                                                                                into a novel meta-learning problem to facilitate learning feature
+       struction of meta-learning tasks with the detected spurious
+                                                                                representations robust to spurious correlations.
+       attributes.
+     • We demonstrate that a classifier with high average accuracy
+       does not necessarily have high worst-group accuracy which                3   PROBLEM FORMULATION
+       is commonly used for measuring the robustness to spurious                                                                 N with x ∈ X,
+                                                                                Consider a training dataset Dtr = {(x n , yn )}n=1           n
+       correlations. Our method, termed as SPUrious-aware MEta-
+                                                                                yn ∈ Y, where X denotes the input space containing all possible
+       learning (SPUME), can train classifiers robust to spurious
+                                                                                inputs, Y denotes the set of K classes. In real-world scenarios, a
+       correlations on five benchmark datasets without knowing
+                                                                                sample x n in Dtr typically has spurious attributes and these at-
+       the spurious correlations a priori.
+                                                                                tributes have spurious correlations with the label yn . We describe
+                                                                                the two important concepts below.
+2    RELATED WORK                                                               • Spurious attributes: A spurious attribute a ∈ A describes some
+Detecting Spurious Attributes. Spurious attributes spuriously                   common patterns in the input space X and spuriously correlates
+correlate with class labels in data and tend to be exploited for                with some label y ∈ Y, where A denotes all possible spurious
+predictions, posing a great risk to the robustness of deep neural               attributes. In other words, a can be in samples of multiple classes
+classifiers. Detecting spurious attributes typically requires domain            or only in some samples of a class, and therefore is not essential to
+knowledge [9, 33] and human annotations [36, 57]. For example,                  any of the classes. For example, the “land background" attribute can
+researchers found that object backgrounds [52] and image tex-                   exist in images of waterbird and landbird classes [42], and “land
+ture [16] are spurious and can bias the predictions of deep learning            background" is non-essential to either of the classes.
+models. Recently, model explanation methods [1, 38] are used to                 • Spurious correlations: A spurious correlation, denoted as ⟨y, a⟩,
+detect spurious attributes. Neurons in the penultimate layer of a               describes the brittle association between the spurious attribute a
+
+
+
+
+                                                                         4525
+Spuriousness-Aware Meta-Learning for Learning Robust Classifiers                                                                 KDD ’24, August 25–29, 2024, Barcelona, Spain
+
+
+    (a)                                                            Spurious Attribute Detection
+                                                                                                                  green                         green
+                                                                                                                 \green        Larger gap               Larger value
+                         Vision-language                      Attribute extractor Add          Attribute set
+                             model       a green vase                                                              vase
+                                                                                                                                            Map vase
+                                           sitting on top of a noun     adjective                                 \vase
+                                           wooden table
+                                                                                                                              Accuracy                   Spuriousness
+                    Step 1: Generate text descriptions           Step 2: Extract informative words                        Step 3: Measure spuriousness (per class)
+
+    (b)       Spuriousness-Aware Task Construction                                      (c)                Meta-Learning Robust Representations
+       Spuriousness scores
+            with                                Support set           Query set                                                      Generate
+                                                                                                                                                 Centroid-based      Loss
+                                                                                                               Feature extractor                   classiﬁer
+
+                             Sample                                                                                                             Backward update
+                                                                                                                    Task t
+                                     ...
+
+
+
+
+                                                     ...
+
+
+
+
+                                                                         ...                    Task t-1       Support     Query
+                                                                                                                                            Task t+1         ...
+                                                                                                                 set        set
+
+
+Figure 1: Overview of SPUME. (a) Detect attributes from training data and measure their spuriousness in three steps. “\green"
+denotes without the attribute “green". (b) Construct spuriousness-aware meta-learning tasks guided by the spuriousness scores
+of the detected attributes. (c) Meta-train a robust feature extractor using the constructed tasks.
+
+
+and the label y. The spurious correlation ⟨y, a⟩ does not always                               certain spurious correlations, the classifier will encounter the same
+hold in the sense that a can be associated with multiple y’s or y                              generalization problem.
+can correlate with other attributes in some samples. Knowing all                                  Spurious correlations pose a great challenge to the robustness
+the spurious correlations in Dtr , we can divide Dtr into multiple                             of machine learning models. To address this, typically, all or partial
+               д
+data groups Dtr , д ∈ G, where д = (y, a) denotes the group label                              group labels of the training data is required for various purposes,
+for samples with the label y and having the spurious attribute a,                              such as formulating the group robustness objective [42], reweight-
+and G = Y × A denotes the set of all group labels.                                             ing the training data, or selecting models [29]. However, acquiring
+   Given a deep neural classifier fθ with parameters θ , we train it                           group labels for a dataset typically involves human-guided annota-
+with empirical risk minimization (ERM) on the training set Dtr and                             tions, which is costly and not scalable, especially when the dataset
+obtain the optimized classifier fθ ∗ as follows:                                               is large. In the following, without the need of group labels, we
+                                                                                               propose a novel spuriousness-aware meta-learning framework to
+                  θ ∗ = arg min E(x,y)∈ Dtr ℓ(fθ (x), y),                         (1)          train a classifier to be robust to spurious correlations.
+                                 θ
+
+where ℓ(·, ·) is the cross-entropy loss function.
+                                                д           д
+   The problem occurs when data groups {Dtr |д ∈ G, Dtr ⊂ Dtr }
+                                                                                               4     SPURIOUSNESS-AWARE META-LEARNING
+in Dtr are imbalanced in sizes or the inductive bias of the classifier                         We give the overview of our framework in Fig. 1, where we first
+                                                                    д
+fθ favors particular data groups. For example, a majority group Dtr                            detect spurious attributes with a pre-trained VLM (Fig. 1(a) and
+with the group label д = (y, a) in Dtr , which has significantly more                          Section 4.1). To effectively use the detected spurious attributes for
+samples than other groups, may bias the optimization in Eq. (1)                                spurious correlation mitigation, we propose a novel meta-learning
+                                  д                                                            strategy and provide details on how to construct spuriousness-
+towards favoring the data in Dtr having the spurious correlation
+⟨y, a⟩, i.e.,                                                                                  aware meta-training tasks (Fig. 1(b) and Section 4.2) and meta-learn
+                                                                                               robust representations (Fig. 1(c) and Section 4.3).
+                  θ ∗ ≈ arg min E(x,y)∈ D д ℓ(fθ (x), y),                         (2)
+                                θ              tr
+
+          д         д′
+                                                                                               4.1      Automatic Spurious Attribute Detection
+with |Dtr | ≫ |Dtr |, where д, д ′ ∈ G and д , д ′ , and | · | denotes the                     To automatically detect spurious attributes in a target dataset with-
+size of a set. As a result, the classifier fθ ∗ , instead of utilizing the core                out human-guided annotations, we propose to exploit the prior
+features in samples to predict y, may superficially learn the mapping                          knowledge in a pre-trained VLM. Our method detects spurious
+from a to y, which is non-robust when the correlation between a                                attributes in text format and consists of the following three steps.
+and y breaks. More specifically, since a is a spurious attribute, there
+may exist ⟨y ′, a⟩ in samples from class y ′ with y , y ′ . Then, it is                           Step 1: Generate Text Descriptions. We generate a text description
+very likely that fθ ∗ will wrongly predict these samples as y instead                          for each image using a pre-trained VLM ϕ, which is capable of
+of y ′ . For example, when fθ ∗ learns to use water backgrounds (a)                            generating text descriptions of images at scale. Moreover, since the
+to predict waterbirds (y), it fails to recognize landbirds (y ′ ) with                         model is trained on massive data and is not specifically fine-tuned
+water backgrounds. Similarly, when the inductive bias in fθ ∗ favors                           on the target dataset, it can discover general objects and patterns.
+
+
+
+
+                                                                                        4526
+KDD ’24, August 25–29, 2024, Barcelona, Spain                                                                       Guangtao Zheng, Wenqian Ye, & Aidong Zhang
+
+
+For example, in Fig. 1(a), besides the class object vase, the VLM                  exclusively in samples of class y, respectively. For both cases, the
+also detects the vase’s color green and a background object table                  spuriousness of ⟨y, a⟩ should be the smallest.
+with its material wooden.                                                             Then, we specifically design γ based on the performance of the
+                                                                                   classifier fθ . The motivation is that the classifier fθ will gener-
+   Step 2: Extract Informative Words as Attributes. We extract in-                 alize poorly on samples of the class y without the attribute a if
+formative words from the text descriptions of images as attributes.                fθ excessively relies on a for predicting the label y. Therefore, as
+We select nouns, which describe objects, and adjectives, which de-                 demonstrated in Fig. 1(a), the spuriousness will be higher if fθ has
+scribe certain properties of objects, as the informative words. For                a larger performance discrepancy on images with and without a
+example, we extract green, vase, top, wooden, and table from the                   and be lower when the performance discrepancy is smaller. We
+description in Fig. 1(a). We instantiate the attribute extractor ψ                 formally define our spuriousness metric for ⟨y, a⟩ as follows,
+with an automatic procedure (Section 5.2) to extract these infor-
+mative words from the text descriptions obtained in the first step.                                                                   (y,a)
+                                                                                                                                 J (Dt r ; fθ )  
+Then, these extracted words are added to the attribute set A as the                           γ (y, a; Dt r , fθ ) = tanh abs log                    ,        (3)
+                                                                                                                                      (y, â)
+possible spurious attributes.                                                                                                     J (Dt r ; fθ )
+Remark. VLMs can detect general objects and patterns. However,                                                              (y, â)            (y,a)
+due to the inductive bias learned during pre-training, VLMs may                    with γ (y, a; Dt r , fθ ) = 0 when Dt r            = ∅ or Dt r      = ∅, where
+                                                                                     (y,a)
+generate text descriptions for some images that are not aligned                    Dt r      ⊂ Dt r denotes the subset of all training data from the
+with human understandings, such as describing a red-and-green                                                          (y, â)
+                                                                                   class c with the attribute a, Dt r   ⊂ Dt r denotes the subset of
+background as a “Christmas tree". Although “Christmas tree" is not                 all training data from the class c without the attribute a, J (·; fθ )
+self-explanatory in this case, it is still a valid and useful attribute,           denotes the classification accuracy of fθ on a given set of samples,
+representing samples having similar red-and-green backgrounds.                     and abs(·) denotes taking the absolute value. The division in Eq. (3)
+This also highlights the benefit of using VLMs: they can detect                    aims to produce larger values than the simple difference between
+patterns that are not easily perceived by humans. A limitation of                  the two accuracies, making different correlations more distinctive.
+such a VLM-based detection approach is that VLMs may struggle on                   Moreover, using log(·) avoids encountering extreme values from
+describing images from domain-specific tasks where, for example,                   the division, and tanh(abs(·)) bounds the score in the range from
+slight changes in orientation of objects or variations in geographies              0 to 1. Other designs of γ are possible, and we have shown in our
+are important for robust predictions. Nevertheless, our proposed                   experiments that our method proposed in the following is robust
+spurious attribute detection approach is not restricted to a specific              to different choices of spuriousness metrics.
+VLM, and it can be improved if more capable VLMs are available.
+                                                                                      Discussion. With the detected attributes and our spuriousness
+   Step 3: Measure Spuriousness. To know whether a detected at-                    metric, we can identify spurious correlations that are likely to
+tribute a ∈ A is spurious, we need to consider it in the correlation               be used for predictions by a classifier and thus pose a potential
+with a class label y, since among all the correlations between the                 risk to the robustness of the classifier. To improve the robustness
+attributes in A and class labels, some of them may be vacuous —                    to spurious correlations, we need to mitigate the classifier’s re-
+they do not exist in the training data (e.g., a only exists in images              liance on those spurious correlations. Since there are multiple spu-
+of the class y ′ with y ′ , y), and some of them are not spurious (e.g.,           rious correlations, mitigating all of them at once is a challenging
+the attribute a is detected exclusively in all the images of the class             task. To address this, we formulate the problem in a novel meta-
+y). Moreover, we are interested in identifying spurious correlations               learning [8, 14, 44, 48] setting, where we construct meta-learning
+that are likely to be exploited by a classifier for predictions as these           tasks with each task containing some potentially harmful spurious
+correlations directly affect the robustness of the classifier.                     correlations. Now, our goal is to learn a good classifier that performs
+   To unify the above cases, we propose a metric to quantify the                   well across all these tasks with various spurious correlations.
+likelihood of the correlation ⟨y, a⟩ being spurious and used by a                     In the following, we first introduce how to construct meta-
+classifier, i.e., spuriousness of the correlation. The metric γ considers          learning tasks with the identified spurious correlations. Then, we
+y, a, the training data Dtr , and the classifier fθ , and maps them                give the details of using the constructed tasks for meta-learning.
+to a finite value, which we call spuriousness score. We defines γ as
+follows.                                                                           4.2       Spuriousness-Aware Task Construction
+Definition 1 (Spuriousness Metric). Given a class label y ∈ Y, an                  To mitigate spurious correlations via meta-learning, we first cre-
+attribute a ∈ A, and a classifier fθ trained on D with θ ∈ Θ, the                  ate meta-learning tasks which will be used in meta-training. A
+spuriousness metric for ⟨y, a⟩ is a mapping γ : Y × A × D × Θ →                    meta-learning task typically consists of a support (training) set S
+[α, β], where D denotes a set of sample-label pairs, Θ denotes the                 providing training samples for learning novel concepts and a query
+set of all possible θ , and [α, β] denotes the output value range of               (test) set Q containing test samples for the evaluation of the learn-
+γ , with α being the lowest and β being the highest. When the                      ing outcome. We use the two sets to simulate spurious correlations
+data group size |D (y,a) | = 0 or |D (y, â) | = 0, where â denotes all           in meta-learning tasks so that these spurious correlations can be
+attributes in A other than a, the mapping γ outputs α.                             effectively mitigated via meta-learning.
+                                                                                      As illustrated in Fig. 1(b), for each class yk with k = 1, . . . , K,
+                                          (y,a)          (y, â)
+   Given the training set Dt r , |Dt r | = 0 and |Dt r | = 0 cor-                  we first sample two attributes ak and ak′ from A based on their
+respond to that ⟨y, a⟩ does not exist in Dt r and that ⟨y, a⟩ exists               spuriousness scores, where ak , ak′ . Specifically, we normalize the
+
+
+
+
+                                                                            4527
+Spuriousness-Aware Meta-Learning for Learning Robust Classifiers                                                                                         KDD ’24, August 25–29, 2024, Barcelona, Spain
+
+
+scores as probabilities, and an attribute with a higher spuriousness                                             Algorithm 1 SPUME
+score will be more likely to be selected than another attribute with                                             Input: A training dataset Dt r , a feature extractor hθ 1 , a
+a lower spuriousness score. In this way, we target the spurious                                                  pre-trained VLM ϕ, an attribute extractor ψ , a spuriousness metric
+correlations that pose a high risk to the robustness of the classifier.                                          γ , the number of tasks per epoch NT , the number of classes K, and
+   Then, the two sampled attributes formulate two spurious cor-                                                  the number of training epochs E.
+relations with yk , i.e., ⟨yk , ak ⟩ and ⟨yk , ak′ ⟩, based on which, we                                         Output: Learned weights θ 1∗
+                                (y ,a )             (yk ,a ′ )
+get two data groups, Dtr k k and Dtr k , from the training set                                                      1: Build the attribute set A = ∪(x,y)∈ Dt r ψ (ϕ(x))
+Dtr . These two groups of data together represent a shift in the                                                    2: for e = 1, . . . , E do
+correlation between the two spurious attributes and the class label.                                                3:   Generate class centroids using Eq. (6) with S = Dt r
+If the classifier learns to rely on the spurious correlation in one                                                 4:   Generate spuriousness scores using Eq. (3)
+group of data for predictions, then it will fail on the other group                                                 5:   Set T (Dtr , A, γ , θ 1 ) as an empty set
+of data with a different spurious correlation. Thus, crafting such a                                                6:   for t = 1, . . . , NT do
+shift facilitates learning a robust classifier.                                                                     7:      Sample K pairs of attributes from A for each class
+    Next, for efficient training, we randomly sample N S data points                                                8:      Construct a spuriousness-aware meta-learning task T
+per class from the two data groups to construct the non-overlapping                                                         using Eq. (4) and (5)
+support set Sk and the query set Qk , i.e.,                                                                         9:      Add T to T (Dtr , A, γ , θ 1 )
+                                                                                                                  10:    end for
+                        NS
+                        Ø                                        (y ,a k )                                        11:    Set θ 1 = θ 1∗ using Eq. (9)
+                Sk =            (x i , yk )|(x i , yk ) ∈ D̃tr k                 ,
+                           
+                                                                                                 (4)
+                                                                                                                  12: end for
+                        i=1
+                                                                                                                  13: return θ 1∗
+and
+                        NS
+                        Ø                                        (yk ,a k′ )                                     Next, we evaluate whether the classifier depends on the spurious
+                Qk =            (x i , yk )|(x i , yk ) ∈ D̃tr                   ,
+                           
+                                                                                                 (5)
+                        i=1                                                                                      correlations in S by testing it on the query set Q where the spurious
+                                                                                                                 correlations in S do not hold. The output probability of the classifier
+          (y ,a k )       (y ,a k )        (yk ,a k′ )             (yk ,a k′ )          (yk ,a k′ )
+where D̃tr k          = Dtr k         − Dtr              and D̃tr                    = Dtr            −          on yk is calculated as follows
+ (y ,a )                                (y ,a )     (yk ,a ′ )                                                                                             exp(τd(wk , hθ 1 (x n )))
+Dtr k k are sets of elements unique to Dtr k k and Dtr k ,                                                                 p(yk |x n , θ 1 , S) = ÍK                                            ,   (7)
+respectively. Taking the above set difference ensures that the two                                                                                       k ′ =1
+                                                                                                                                                                  exp(τd(wk ′ , hθ 1 (x n )))
+spurious correlations won’t appear in the same set since some                                                    where d(·, ·) denotes the cosine similarity between two embedding
+samples may have both the attributes ak and ak′ .                                                                vectors, and τ denotes a scaling hyperparameter. Then, the task
+    After constructing the two sets for each class, we obtain the con-                                           loss ℓ T on T = {S, Q} is as follows
+structed task T = {S, Q} with S = ∪k=1 K S and Q = ∪K Q . If K
+                                             k             k =1 k
+is large, we can randomly select a subset of K classes to construct T .                                                        ℓ T (θ 1 ) =          E        − log p(yn |x n , θ 1 , S).           (8)
+                                                                                                                                              (x n ,yn )∈ Q
+The constructed task T demonstrates to the classifier that the spu-
+                                                                                                                 A high loss indicates that the classifier, and in turn the feature
+rious correlations in T are highly risky for it, and that the classifier
+                                                                                                                 extractor hθ 1 , rely on the spurious correlations in the support set
+should be invariant to them in order to perform well on this task.
+                                                                                                                 and cannot generalize well on the query set.
+Importantly, the construction of meta-learning tasks also ensures
+                                                                                                                 Learning Objective. We minimize the loss in (8) over tasks con-
+that biases in VLMs won’t be passed down to the classifier as the
+                                                                                                                 structed with various spurious correlations to find a feature extrac-
+construction process effectively decorrelates biased attributes from
+VLMs with prediction targets.                                                                                    tor hθ 1∗ that is robust to multiple spurious correlations, i.e.,
+                                                                                                                                θ 1∗ = arg min E T ∈T (Dtr, A,γ ,θ 1 ) ℓ T (θ 1 ),                  (9)
+                                                                                                                                                θ1
+4.3     Meta-Learning Robust Representations
+                                                                                                                 where T (Dtr , A, γ , θ 1 ) denotes all possible meta-learning tasks con-
+To train a robust classifier using the constructed tasks, we modify
+                                                                                                                 structed from Dtr based on the detected attributes A, the spurious-
+fθ so that it fits in with the meta-learning paradigm. Specifically,
+                                                                                                                 ness metric γ , and the feature extractor θ 1 .
+we discard the last linear classification layer of fθ and keep its
+                                                                                                                     To solve (9), we adopt an iterative optimization procedure. We
+feature extractor hθ 1 : X → RD , where θ 1 ⊂ θ and D is the number
+                                                                                                                 first fix θ 1 and construct a set of meta-training tasks based on A, θ 1 ,
+of dimensions in the feature extractor’s outputs. Thus, learning a
+                                                                                                                 and γ . Then, we update θ 1 using the constructed tasks. The above
+robust classifier is equivalent to learning robust representations.
+                                                                                                                 steps are iterated until some stop criterion is met. We name our
+   As illustrated in Fig. 1(c), for the t’th task, we use the repre-
+                                                                                                                 method as SPUriousness-aware MEta-Learning (SPUME) and give
+sentations of the samples in the support set S provided by hθ 1 to
+                                                                                                                 the training details in Algorithm 1.
+generate (learn) a centroid-based classifier with K class-centroids
+                                                                                                                 Complexity Analysis. VLMs do not incur training cost because
+W = {w1 , . . . , wK } calculated as follows
+                                                                                                                 they are only used for data preparation. Extracting attributes (Line
+                               NS                                                                                1, Algorithm 1) is a onetime offline process, and empirically, its
+                            1 Õ
+                  wk =            h (x n ), (x n , yk ) ∈ S.                                     (6)             time cost scales linearly with the dataset size. Spuriousness mea-
+                           N S n=1 θ 1
+                                                                                                                 surement (Line 4, Algorithm 1) is performed periodically during
+
+
+
+
+                                                                                                          4528
+KDD ’24, August 25–29, 2024, Barcelona, Spain                                                                Guangtao Zheng, Wenqian Ye, & Aidong Zhang
+
+
+training, and its time complexity grows linearly with the amount of                                     Number of         Average number of
+data it uses. The total training cost is O(E(Cm +Cs )), where E is the                              detected attributes   attributes per image
+number of training epochs, Cm and Cs are the time cost of meta-                        Dataset
+                                                                                                    BLIP    ViT-GPT2       BLIP     ViT-GPT2
+learning a classifier and obtaining spuriousness scores per epoch,
+respectively, with Cm ≫ Cs , since the latter only requires for-                     Waterbirds     160        144        3.301        4.314
+ward passes through the classifier. Moreover, using a metric-based                     CelebA       683        345        3.913        4.291
+meta-learning technique (Eq. (6)) leads to Cm being comparable to                      NICO         239        199        3.104        3.995
+training a standard classifier. Therefore, our method does not incur                 ImageNet-9     540        442        3.276        4.311
+significant training cost compared with the ERM training.                       Table 1: Statistics of the attributes detected from the Water-
+Model Selection. We divide the validation data Dval into groups                 birds, CelebA, NICO, and ImageNet-9 datasets.
+based on the detected attributes A and calculate the average accu-
+racy over these groups as follows,
+                            1     Õ Õ          (y,a)
+             Accpu =                        J Dval ; hθ 1 .
+                                                         
+                                                                  (10)
+                       |A| · |Y|                                                transformer [13] as the encoder and the language model GPT-2
+                                     a ∈A y ∈Y
+                                                                                [39] as the decoder. BLIP has a multimodal mixture of encoder-
+We call this metric pseudo-unbiased accuracy, which fairly measures             decoder architecture. After generating text descriptions, we used
+the performance of the classifier on various groups inferred with               Spacy (https://spacy.io/) to extract nouns and adjectives from the
+the detected attributes in A.                                                   descriptions automatically. We additionally filtered out words with
+Inference. We first create a centroid-based classifier using Eq. (6)            frequencies less than 10 to remove potential annotation noise and to
+with all the data in Dtr . Then, given a test sample x, the prediction          ensure that we have enough samples to construct a meta-learning
+is ŷ = arg maxy ∈Y p(y|x, θ 1 , Dtr ).                                         task with selected spurious attributes. We give the statistics of the
+                                                                                detected spurious attributes in the four datasets (ImageNet-A is
+5 EXPERIMENT                                                                    not included as it is only used for testing) in Table 1. BLIP detects
+5.1 Datasets                                                                    more attributes than ViT-GPT2 overall but less attributes for each
+                                                                                image. Based on the two VLMs, our method has two variations,
+We tested our method on five image classification datasets with
+                                                                                namely SPUME-BLIP and SPUME-ViT-GPT2. In the following
+various types of spurious correlations, which are introduced below.
+                                                                                experiments, we report the results of both methods.
+Detailed dataset statistics are give in Table 8 in Appendix.
+Waterbirds [42] contains waterbird and landbird classes. It is a                   Training Settings. We set N S = 10 for sampling each class of
+synthetic dataset generated by combining images of the two kinds                images for both the support and query sets of a task. Following
+of birds from the CUB dataset [50] with water and land backgrounds              existing settings [23, 42, 46], we used ResNet-50 as the feature ex-
+from the Places dataset [59], producing (landbird, land), (landbird,            tractor for the experiments on the Waterbirds and CelebA datasets,
+water), (waterbird, land), and (waterbird, water) groups.                       and used ResNet-18 on the ImageNet-9 and NICO datasets. All mod-
+CelebA [30] is a large-scale image dataset of celebrity faces. It con-          els were initialized with weights pre-trained on ImageNet. We used
+tains images showing two hair colors, non-blond and blond, which                a stochastic gradient descent (SDG) optimizer with a momentum
+are spuriously correlated with gender. There are four groups in                 of 0.9 and a weight decay of 10−4 during meta-training. We trained
+the CelebA dataset: (non-blond, female), (non-blond, male), (blond,             a model for 100 epochs and used the cosine annealing scheduler to
+female), and (blond, male).                                                     control the decay of learning rate. Without any group labels, our
+ImageNet-9 [21] is a subset of ImageNet [12] and contains nine                  method used the pseudo-unbiased accuracy on the validation set
+super-classes. It is known to have correlations between object                  defined in Eq. (10) for model selection, while other methods used
+classes and image textures. We followed the setting in [23] and                 the average validation accuracy. We repeated each experiment three
+[3] to prepare training and validation data.                                    times and calculated the averaged results with standard deviations.
+ImageNet-A [20] is a dataset of real-world images, adversarially                We provide additional training details in Appendix. All experiments
+curated to test the limits of classifiers such as ResNet-50. While              were conducted on NVIDIA A100 GPUs.
+these images are from standard ImageNet classes [12], they are
+often misclassified in multiple models. We used this dataset to test               Baselines. We compare our methods with state-of-the-art meth-
+the robustness of a classifier after training it on ImageNet-9.                 ods on mitigating spurious correlations and provide descriptions of
+NICO [19] is designed for out-of-distribution image classification,             the baseline methods in Appendix. For fair comparison, the same
+simulating real-world scenarios where testing distributions differ              feature extractor was used for methods compared on each dataset.
+from training ones. It labels images with both main concepts (e.g.,             Group labels were not used for model training and selection for
+cat) and contexts (e.g., at home). We used the Animal super-class               all the compared methods. Note that we did not include VLMs as
+in NICO and followed the setting in [4, 46] for data preparation.               baselines, as they were exclusively used for extracting attributes
+                                                                                from training data in our method. Moreover, directly using VLMs
+5.2     Experimental Setup                                                      requires a completely different design, e.g., designing proper input
+                                                                                prompts for classification.
+  Spurious Attribute Detection. We used two pre-trained VLMs,
+ViT-GPT2 [35] and BLIP [28] to generate text descriptions for im-                  Evaluation Metrics. To evaluate the robustness to spurious cor-
+ages. ViT-GPT2 has an encoder-decoder structure with a vision                   relations on the Waterbirds and CelebA datasets, which provide
+
+
+
+
+                                                                         4529
+Spuriousness-Aware Meta-Learning for Learning Robust Classifiers                                                      KDD ’24, August 25–29, 2024, Barcelona, Spain
+
+
+                                         Class: landbird                       1.0                    1.0                   1.0                  1.0
+   Support samples                                                             0.8                    0.8                   0.8                  0.8
+      Attribute: horse                                                         0.6                    0.6                   0.6                  0.6
+                                                                               0.4                    0.4                   0.4                  0.4
+                                                                               0.2                    0.2                   0.2                  0.2
+    Query samples
+                                                                               0.0                    0.0                   0.0                  0.0
+                                                                                   0 40 80 120 160 0 40 80 120 160 0 40 80 120 160 0 40 80 120 160
+    Attribute: ocean                                                             (a) landbird (before) (b) landbird (after) (c) waterbird (before) (d) waterbird (after)
+                                                                               1.0                    1.0                   1.0                  1.0
+                                                                               0.8                    0.8                   0.8                  0.8
+                                         Class: waterbird
+   Support samples                                                             0.6                    0.6                   0.6                  0.6
+                                                                               0.4                    0.4                   0.4                  0.4
+  Attribute: grass ﬁeld
+                                                                               0.2                    0.2                   0.2                  0.2
+                                                                               0.0 0 200 400 600 0.0 0 200 400 600 0.0 0 200 400 600 0.0 0 200 400 600
+    Query samples                                                               (e) non-blond (before) (f) non-blond (after) (g) blond (before)      (h) blond (after)
+      Attribute: group
+                                                                               Figure 3: Spuriousness scores for all the class-attribute cor-
+                                                                               relations before and after applying SPUME-BLIP to a classi-
+Figure 2: A meta-learning task with N S = 5 constructed from                   fier. The horizontal axes represent the indexes of detected
+the Waterbirds dataset. Images in the support set differ sig-                  attributes or class-attribute correlations, and the vertical
+nificantly from images in the query set in terms of their                      axes represent the spuriousness scores. (a)-(d) Spuriousness
+backgrounds.                                                                   scores on the Waterbirds dataset with landbird and wa-
+                                                                               terbird classes. (e)-(h) Spuriousness scores on the CelebA
+                                                                               dataset with non-blond and blond classes.
+
+
+                                                                               5.4      SPUME Mitigates Reliance on Spurious
+group labels, we adopted the widely accepted robustness metric,                         Correlations
+worst-group accuracy, that gives the lower-bound performance
+of a classifier on the test set with various dataset biases. We also           We calculated the spuriousness scores for all the detected class-
+calculated the accuracy gap between the standard average accu-                 attribute correlations before and after applying SPUME-BLIP to a
+racy and the worst-group accuracy as a measure of a classifier’s               classifier with the ResNet-50 backbone initialized with ImageNet
+reliance on spurious correlations. A high worst-group accuracy                 pre-trained weights. We sorted the scores in the “before" scenarios
+with a low accuracy gap indicates that the classifier is robust to             and kept the order in the corresponding “after" scenarios. From Fig.
+spurious correlations and can fairly predict samples from different            3(a), (c), (e), and (g), we observe that the initial classifiers exhibit
+groups. We adopted average accuracy for the evaluations on the                 high reliance on the detected class-attribute correlations which
+NICO, ImageNet-9, and ImageNet-A datasets as the these datasets                have high spuriousness scores. After applying SPUME-BLIP to the
+are specifically constructed to evaluate the robustness to distribu-           classifiers on the Waterbirds dataset, we observe from Fig. 3(b) and
+tional shifts.                                                                 (d) that the reliance on most of class-attribute correlations are miti-
+                                                                               gated and these correlations all have low spuriousness scores. On
+                                                                               the CelebA dataset, which has more class-attribute correlations than
+5.3      Visualization of a Spuriousness-Aware Task                            the Waterbirds dataset, it becomes more challenging to mitigate the
+We show a spuriousness-aware meta-learning task constructed                    reliance on all these correlations. As observed from Fig. 3 (f) and
+from the Waterbirds dataset with N S = 5 in Fig. 2. For images in              (h), some correlations, which have low spuriousness scores initially,
+the same class, their backgrounds differ significantly in the support          become highly spurious. Nevertheless, SPUME-BLIP can still miti-
+and query sets. Specifically, the landbird images selected based on            gate the reliance on most of the class-attribute correlations having
+the attribute “horse" in the support set have land backgrounds, while          high spuriousness scores. Moreover, since spuriousness scores are
+the same-class images selected based on the attribute “ocean" in               not directly incorporated into our optimization objective in (9), the
+the query set mainly have water backgrounds. Similarly, the query              decrease in spuriousness scores demonstrates the effectiveness of
+images of waterbird selected based on the attribute “group" have               our spuriousness-aware meta-learning strategy in mitigating the
+backgrounds filled with a group of people, while the corresponding             reliance on spurious correlations.
+support images selected based on the attribute “grass field" have
+grass backgrounds without irrelevant objects.                                  5.5      Quantitative Evaluation
+    The constructed task creates a challenging learning scenario for           We compared our methods with prior methods on mitigating spuri-
+classifiers that rely on spurious correlations for predictions. For            ous correlations on the five datasets. On each of the datasets, we
+example, a classifier that learns to use the land backgrounds to               show the reported results of these methods when they are available
+predict landbird from the support set will fail to predict landbird            and give the details of these methods in Appendix.
+images with water backgrounds in the query set. Optimizing a clas-               For experiments on the Waterbirds and CelebA datasets, we
+sifier’s performance on these spuriousness-aware tasks facilitates             aimed to simulate a more realistic learning scenario and thus did
+the classifier to learn to be invariant to spurious correlations.              not provide group labels during model training, even though the
+
+
+
+
+                                                                        4530
+KDD ’24, August 25–29, 2024, Barcelona, Spain                                                                 Guangtao Zheng, Wenqian Ye, & Aidong Zhang
+
+
+     Method                    Worst-group acc. (↑)   Acc. gap (↓)                               Method                Accuracy (↑)
+     ERM                                  66.4           23.8                                    ERM                        75.9
+     LfF [31]                             44.1           47.1                                    REx [25]                   74.3
+     CVaR DRO [27]                        62.0           33.2                                    Group DRO [42]             77.6
+     JTT [29]                             62.5           30.8                                    JiGen [7]                  85.0
+     DFR [24]                             77.4           14.7                                    Mixup [55]                 80.3
+     DivDis [26]                          81.0            9.7                                    CNBB [19]                  78.2
+                                                                                                 DecAug [4]                 85.2
+     SPUME-ViT-GPT2                   85.9±0.2         6.9±0.8
+                                                                                                 SIFER [47]               86.2±0.9
+     SPUME-BLIP                       85.7±0.2         6.1±0.4
+Table 2: Comparison of worst-group accuracy (%) and accu-                                        SPUME-ViT-GPT2          88.2±1.1
+racy gap (%) on the Waterbirds dataset. All methods do not                                       SPUME-BLIP              89.2±0.4
+have access to ground-truth group labels.                                        Table 4: Comparison of average accuracy (%) on the NICO
+                                                                                 dataset. Most of the methods (DecAug, DRO, etc) use group
+                                                                                 information for training, while we do not use it.
+
+     Method                    Worst-group acc. (↑)   Acc. gap (↓)
+     ERM                                  45.7           49.8
+     LfF [31]                             24.4           60.7
+     CVaR DRO [27]                        36.1           46.4                     Method              ImageNet-9 (↑)   ImageNet-A (↑)     Acc. gap (↓)
+     JTT [29]                             40.6           47.4                     ERM                    90.8±0.6          24.9±1.1           65.9
+     DFR [24]                             46.0           49.8                     ReBias [3]             91.9±1.7          29.6±1.6           62.3
+     DivDis [26]                          55.0           35.8                     LfF [31]                 86.0              24.6             61.4
+     MaskTune [2]                         78.0           13.3                     CaaM [49]                95.7              32.8             62.9
+                                                                                  SSL+ERM [23]           94.2±0.1          34.2±0.5            60
+     SPUME-ViT-GPT2                   84.4±1.2         5.9±0.7                    LWBC[23]               94.0±0.2          36.0±0.5            58
+     SPUME-BLIP                       86.0±1.0         4.1±1.0                    SIFER [46]             97.8±0.1          40.0±0.8           57.8
+Table 3: Comparison of worst-group accuracy (%) and accu-                         SPUME-ViT-GPT2          95.3±0.5         44.3±0.8        51.0±1.1
+racy gap (%) on the CelebA dataset. All methods do not have                       SPUME-BLIP              95.5±0.2         42.5±0.8        53.0±0.7
+access to ground-truth group labels.                                             Table 5: Comparison of average accuracy (%) and accuracy
+                                                                                 gap (%) on the ImageNet-9 and ImageNet-A datasets.
+
+
+two datasets provide group labels. During testing, we used the
+group labels to formulate the worst-group accuracy and calculated
+the accuracy gap as the standard average accuracy minus the worst-
+group accuracy. The two metrics measure a classifier’s robustness                much better than SPUME-ViT-GPT2 on the CelebA dataset where
+to specific spurious correlations specified by the group labels, and             BLIP detects approximately twice as many attributes as ViT-GPT2
+our goal is to train the classifier to be robust to these spurious               does (Table 1), suggesting that detecting more attributes benefits
+correlations without knowing them.                                               SPUME in training more robust classifiers.
+   Our methods, SPUME-ViT-GPT2 and SPUME-BLIP achieve the                           The NICO dataset provides object-context correlations and aims
+best worst-group accuracy and the best accuracy gap on the Wa-                   to evaluate the out-of-distribution generalization capability of a
+terbirds and CelebA datasets (Tables 2 and 3), suggesting that our               classifier by testing it in new contexts. We did not use the provided
+trained classifiers have strong and balanced prediction capability               correlations during training and calculated the standard average ac-
+across different data groups. Note that the spurious attribute detec-            curacy on the test set with new object-context correlations. SPUME-
+tion process proposed in Section 4.1 could introduce biases present              ViT-GPT2 and SPUME-BLIP outperform previous methods with
+in VLMs into the detected spurious attributes. More specifically,                higher average accuracies (Table 4).
+biases in different VLMs result in different sets of attributes. Conse-             For the experiments on the ImageNet-9 which does not provide
+quently, SPUME simulates different sets of spurious correlations                 information on spurious correlations, we trained and tested our
+during meta-training. However, this wouldn’t be a significant con-               methods on the ImageNet-9 dataset. We also tested our methods on
+cern. Since our spurious attribute detection process can detect many             the ImageNet-A dataset which contains images representing various
+distinctive attributes with well-established VLMs, SPUME can miti-               failure prediction modes in an ImageNet pre-trained classifier. The
+gate many potential spurious correlations. Thus, biases in VLMs                  accuracy gap is calculated as the average validation accuracy on the
+won’t significantly affect the effectiveness of our framework. We                ImageNet-9 dataset minus the average accuracy on the ImageNet-
+demonstrate this by showing that SPUME with two well-established                 A dataset. Our methods achieve the best on ImageNet-A while
+VLMs are effective and have comparable performance across dif-                   well balancing between different prediction modes with the lowest
+ferent datasets (Tables 2 and 3). Moreover, SPUME-BLIP performs                  accuracy gaps (Table 5).
+
+
+
+
+                                                                          4531
+Spuriousness-Aware Meta-Learning for Learning Robust Classifiers                                                                      KDD ’24, August 25–29, 2024, Barcelona, Spain
+
+
+                Method         Worst-group acc (↑)         Acc. gap (↓)                            Metric                          Worst-group acc. (↑)      Acc. gap (↓)
+               ERM                       66.4                      23.8                           tanh(abs(log(η)))                     85.7±0.2               6.1±0.4
+            ERM-Cosine                   75.5                      17.5                           abs(δ )                               85.5±0.2               6.3±0.3
+                                                                                                  Constant                              85.1±0.2               6.7±0.3
+        SPUME-Random                  78.7±0.9               10.5±0.8
+                                                                                                  tanh(log(η))                          84.8±0.2               7.3±0.4
+         SPUME-BLIP                   85.7±0.2               6.1±0.4
+                                                                                                  δ                                     84.5±0.5               7.4±0.9
+       SPUME-ViT-GPT2                 85.9±0.3                6.9±0.8
+                                                                                  Table 7: Analysis on different designs of spuriousness met-
+Table 6: Worst-group accuracy and accuracy gap com-
+                                                                                  rics. We tested SPUME-BLIP on the Waterbirds dataset.
+parisons between meta-learning based methods with
+spuriousness-aware (SPUME-BLIP and SPUME-ViT-GPT2)
+and random (SPUME-Random) task constructions, and
+
+
+
+
+                                                                                       Worst-group accuracy (%)
+ERM-trained models on the Waterbirds dataset.                                                                                                   Worst-group accuracy 6.6
+                                                                                                                  85.5
+
+
+
+
+                                                                                                                                                                              Accuracy gap (%)
+                                                                                                                                                Accuracy gap
+                                                                                                                  85.0                                               6.4
+
+                                                                                                                  84.5                                                  6.2
+5.6       Ablation Study                                                                                          84.0
+                                                                                                                                                                        6.0
+
+   Spuriousness-Aware Task Construction. To evaluate the effective-                                                                                                     5.8
+                                                                                                                         15   20                                  100
+ness of using VLMs to guide the construction of meta-learning
+tasks, we compared SPUME with SPUME-Random which uses ran-
+domly constructed tasks during training. We also included the                     Figure 4: Worst-group accuracy and accuracy gap compar-
+classical ERM model and the ERM-Cosine model that uses cosine                     isons between SPUME-BLIP with different τ ’s on Water-
+distance for predictions to compare with the meta-learning based                  birds.
+approaches. We observe from Table 6 that switching to the cosine-
+distance-based classifier increases the robustness to spurious cor-
+relations. Moreover, SPUME-Random outperforms ERM by 12.3%                        outputs of VLMs. To show this, we added an additional layer after
+in the worst-group accuracy and improves the accuracy gap by                      the backbone to predict detected attributes for each image, acting
+13.3%, demonstrating that meta-learning is a promising approach                   as a regularization. We then fine-tuned the whole model on the
+to improve the robustness to spurious correlations. Additionally,                 Waterbirds and CelebA datasets, respectively. The worst-group
+using spuriousness-aware meta-learning tasks constructed with                     accuracies on the two datasets are 71.7% and 47.2%, respectively,
+the VLMs (BLIP and ViT-GPT2) can further improve robustness to                    which are close to ERM trained models. Therefore, the attributes
+spurious correlations. Specifically, SPUME-BLIP achieves 7.0% and                 themselves do not provide useful regularization on the robustness
+4.4% increments over SPUME-Random in the worst-group accuracy                     of the classifier. Moreover, directly using VLMs for predictions
+and accuracy gap, respectively, and SPUME-ViT-GPT2 achieves                       requires a completely different inference pipeline and is not as
+7.2% and 3.6% increments in the two metrics.                                      effective as our proposed SPUME. Details are provided in Appendix.
+
+   Different Designs of the Spuriousness Metric. We have given our                6   CONCLUSION
+design of spuriousness metric in Eq. (3). Here, we explore other pos-
+                                                         (y,a)                    We proposed a novel framework to train a classifier to be robust
+sible design choices shown in Table 7, where δ = J (Dt r ; fθ ) −                 against spurious correlations in settings where spurious correla-
+      (y, â)                (y,a)            (y, â)
+J (Dt r ; fθ ), η = J (Dt r ; fθ )/J (Dt r ; fθ ), J (·; ·) is the accu-          tions are not known or specified. We first adopted a pre-trained VLM
+racy measure used in Eq. (3), and “Constant" represents that we                   to automatically extract text-format attributes from a target dataset.
+assign the same score for all the detected attributes. Our method                 Then, we quantified the spuriousness of the correlations between
+SPUME-BLIP works well with different spuriousness metrics and                     detected attributes and class labels using a spuriousness metric.
+still outperforms the baselines we compared in Table 2. Moreover,                 To effectively mitigate multiple detected spurious correlations, we
+our method works well with non-negative spuriousness metrics as                   adopted a meta-learning strategy which iteratively meta-trains a
+SPUME with tanh(abs(log(η))) or abs(δ ) performs better than with                 classifier on multiple meta-learning tasks constructed to represent
+the other two metrics.                                                            various class-attribute correlations with high spuriousness values.
+                                                                                  Our framework, SPUME, mitigates many highly spurious corre-
+   Scaling Parameter of the Centroid-Based Classifier. We analyzed                lations in training samples and performs the best under different
+how the scaling parameter τ of the centroid-based classifier (Eq. (7))            robustness measures on five benchmark datasets. In the future, we
+affects the performance of SPUME. Fig. 4 shows the worst-group                    aim to explore more capable VLMs and combine other approaches,
+accuracies and accuracy gaps of SPUME-BLIP with different τ ’s                    e.g., customized data augmentations, for mitigating a model’s re-
+on the Waterbirds dataset. A very large or small τ , e.g., τ = 100 or             liance on a wider range of spurious correlations.
+τ = 1, harms to robustness of the trained classifiers. In practice, we
+set τ to be in the range from 5 to 50.                                            ACKNOWLEDGMENTS
+  Effects of Using VLMs. Although SPUME uses VLMs for data                        This work is supported in part by the US National Science Founda-
+preprocessing, the robustness does not directly come from the                     tion under grants 2217071, 2213700, 2106913, 2008208, 1955151.
+
+
+
+
+                                                                           4532
+KDD ’24, August 25–29, 2024, Barcelona, Spain                                                                                          Guangtao Zheng, Wenqian Ye, & Aidong Zhang
+
+
+REFERENCES                                                                                       [24] Polina Kirichenko, Pavel Izmailov, and Andrew Gordon Wilson. 2023. Last Layer
+ [1] Abubakar Abid, Mert Yuksekgonul, and James Zou. 2022. Meaningfully debugging                     Re-Training is Sufficient for Robustness to Spurious Correlations. In International
+     model mistakes using conceptual counterfactual explanations. In International                    Conference on Learning Representations.
+     Conference on Machine Learning. PMLR, 66–88.                                                [25] David Krueger, Ethan Caballero, Joern-Henrik Jacobsen, Amy Zhang, Jonathan
+ [2] Saeid Asgari, Aliasghar Khani, Fereshte Khani, Ali Gholami, Linh Tran, Ali                       Binas, Dinghuai Zhang, Remi Le Priol, and Aaron Courville. 2021. Out-of-
+     Mahdavi Amiri, and Ghassan Hamarneh. 2022. Masktune: Mitigating spurious                         distribution generalization via risk extrapolation (rex). In International Conference
+     correlations by forcing to explore. Advances in Neural Information Processing                    on Machine Learning. PMLR, 5815–5826.
+     Systems 35 (2022), 23284–23296.                                                             [26] Yoonho Lee, Huaxiu Yao, and Chelsea Finn. 2022. Diversify and disambiguate:
+ [3] Hyojin Bahng, Sanghyuk Chun, Sangdoo Yun, Jaegul Choo, and Seong Joon                            Out-of-distribution robustness via disagreement. In International Conference on
+     Oh. 2020. Learning de-biased representations with biased representations. In                     Learning Representations.
+     International Conference on Machine Learning. PMLR, 528–539.                                [27] Daniel Levy, Yair Carmon, John C Duchi, and Aaron Sidford. 2020. Large-scale
+ [4] Haoyue Bai, Rui Sun, Lanqing Hong, Fengwei Zhou, Nanyang Ye, Han-Jia Ye,                         methods for distributionally robust optimization. Advances in Neural Information
+     S-H Gary Chan, and Zhenguo Li. 2021. Decaug: Out-of-distribution general-                        Processing Systems 33 (2020), 8847–8860.
+     ization via decomposed feature representation and semantic augmentation. In                 [28] Junnan Li, Dongxu Li, Caiming Xiong, and Steven Hoi. 2022. Blip: Bootstrapping
+     Proceedings of the AAAI Conference on Artificial Intelligence, Vol. 35. 6705–6713.               language-image pre-training for unified vision-language understanding and
+ [5] Sara Beery, Grant Van Horn, and Pietro Perona. 2018. Recognition in terra                        generation. In International Conference on Machine Learning. PMLR, 12888–12900.
+     incognita. In Proceedings of the European Conference on Computer Vision. 456–               [29] Evan Z Liu, Behzad Haghgoo, Annie S Chen, Aditi Raghunathan, Pang Wei Koh,
+     473.                                                                                             Shiori Sagawa, Percy Liang, and Chelsea Finn. 2021. Just train twice: Improving
+ [6] Jonathon Byrd and Zachary Lipton. 2019. What is the effect of importance                         group robustness without training group information. In International Conference
+     weighting in deep learning?. In International Conference on Machine Learning.                    on Machine Learning. PMLR, 6781–6792.
+     PMLR, 872–881.                                                                              [30] Ziwei Liu, Ping Luo, Xiaogang Wang, and Xiaoou Tang. 2015. Deep learning
+ [7] Fabio M Carlucci, Antonio D’Innocente, Silvia Bucci, Barbara Caputo, and Tatiana                 face attributes in the wild. In Proceedings of the IEEE International Conference on
+     Tommasi. 2019. Domain generalization by solving jigsaw puzzles. In Proceedings                   Computer Vision. 3730–3738.
+     of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. 2229–                [31] Junhyun Nam, Hyuntak Cha, Sungsoo Ahn, Jaeho Lee, and Jinwoo Shin. 2020.
+     2238.                                                                                            Learning from failure: De-biasing classifier from biased classifier. Advances in
+ [8] Yinbo Chen, Xiaolong Wang, Zhuang Liu, Huijuan Xu, and Trevor Darrell. 2020.                     Neural Information Processing Systems 33 (2020), 20673–20684.
+     A new meta-baseline for few-shot learning. arXiv preprint arXiv:2003.04390                  [32] Junhyun Nam, Jaehyung Kim, Jaeho Lee, and Jinwoo Shin. 2022. Spread Spurious
+     (2020).                                                                                          Attribute: Improving Worst-group Accuracy with Spurious Attribute Estimation.
+ [9] Christopher Clark, Mark Yatskar, and Luke Zettlemoyer. 2019. Don’t Take the                      In International Conference on Learning Representations.
+     Easy Way Out: Ensemble Based Methods for Avoiding Known Dataset Biases. In                  [33] Meike Nauta, Ricky Walsh, Adam Dubowski, and Christin Seifert. 2021. Uncover-
+     Proceedings of the 2019 Conference on Empirical Methods in Natural Language Pro-                 ing and correcting shortcut learning in machine learning models for skin cancer
+     cessing and the 9th International Joint Conference on Natural Language Processing                diagnosis. Diagnostics 12, 1 (2021), 40.
+     (EMNLP-IJCNLP). 4069–4082.                                                                  [34] Yannic Neuhaus, Maximilian Augustin, Valentyn Boreiko, and Matthias Hein.
+[10] Elliot Creager, Jörn-Henrik Jacobsen, and Richard Zemel. 2021. Environment                       2022. Spurious Features Everywhere–Large-Scale Detection of Harmful Spurious
+     inference for invariant learning. In International Conference on Machine Learning.               Features in ImageNet. arXiv preprint arXiv:2212.04871 (2022).
+     PMLR, 2189–2200.                                                                            [35] NLP Connect. 2022. vit-gpt2-image-captioning (Revision 0e334c7). https://
+[11] Yin Cui, Menglin Jia, Tsung-Yi Lin, Yang Song, and Serge Belongie. 2019. Class-                  huggingface.co/nlpconnect/vit-gpt2-image-captioning.
+     balanced loss based on effective number of samples. In Proceedings of the IEEE/CVF          [36] Besmira Nushi, Ece Kamar, and Eric Horvitz. 2018. Towards accountable ai:
+     Conference on Computer Vision and Pattern Recognition. 9268–9277.                                Hybrid human-machine analyses for characterizing system failure. In Proceedings
+[12] Jia Deng, Wei Dong, Richard Socher, Li-Jia Li, Kai Li, and Li Fei-Fei. 2009. Im-                 of the AAAI Conference on Human Computation and Crowdsourcing, Vol. 6. 126–
+     ageNet: A large-scale hierarchical image database. In 2009 IEEE Conference on                    135.
+     Computer Vision and Pattern Recognition. 248–255. https://doi.org/10.1109/CVPR.             [37] Boris Oreshkin, Pau Rodríguez López, and Alexandre Lacoste. 2018. TADAM:
+     2009.5206848                                                                                     Task dependent adaptive metric for improved few-shot learning. In Advances in
+[13] Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, Xi-                     Neural Information Processing Systems. 721–731.
+     aohua Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg                  [38] Gregory Plumb, Marco Tulio Ribeiro, and Ameet Talwalkar. 2022. Finding and
+     Heigold, Sylvain Gelly, et al. 2020. An Image is Worth 16x16 Words: Trans-                       Fixing Spurious Patterns with Explanations. Transactions on Machine Learning
+     formers for Image Recognition at Scale. In International Conference on Learning                  Research (2022). Expert Certification.
+     Representations.                                                                            [39] Alec Radford, Jeffrey Wu, Rewon Child, David Luan, Dario Amodei, Ilya Sutskever,
+[14] Chelsea Finn, Pieter Abbeel, and Sergey Levine. 2017. Model-agnostic meta-                       et al. 2019. Language models are unsupervised multitask learners. OpenAI blog
+     learning for fast adaptation of deep networks. In International Conference on                    1, 8 (2019), 9.
+     Machine Learning, Vol. 70. 1126–1135.                                                       [40] Aniruddh Raghu, Maithra Raghu, Samy Bengio, and Oriol Vinyals. 2020. Rapid
+[15] Robert Geirhos, Jörn-Henrik Jacobsen, Claudio Michaelis, Richard Zemel,                          Learning or Feature Reuse? Towards Understanding the Effectiveness of MAML.
+     Wieland Brendel, Matthias Bethge, and Felix A Wichmann. 2020. Shortcut learn-                    In International Conference on Learning Representations.
+     ing in deep neural networks. Nature Machine Intelligence 2, 11 (2020), 665–673.             [41] Andrei A. Rusu, Dushyant Rao, Jakub Sygnowski, Oriol Vinyals, Razvan Pascanu,
+[16] Robert Geirhos, Patricia Rubisch, Claudio Michaelis, Matthias Bethge, Felix A.                   Simon Osindero, and Raia Hadsell. 2019. Meta-Learning with Latent Embedding
+     Wichmann, and Wieland Brendel. 2019. ImageNet-trained CNNs are biased                            Optimization. In International Conference on Learning Representations.
+     towards texture; increasing shape bias improves accuracy and robustness.. In                [42] Shiori Sagawa, Pang Wei Koh, Tatsunori B Hashimoto, and Percy Liang. 2019.
+     International Conference on Learning Representations.                                            Distributionally Robust Neural Networks. In International Conference on Learning
+[17] Zongbo Han, Zhipeng Liang, Fan Yang, Liu Liu, Lanqing Li, Yatao Bian, Peilin                     Representations.
+     Zhao, Bingzhe Wu, Changqing Zhang, and Jianhua Yao. 2022. Umix: Improving                   [43] Sahil Singla and Soheil Feizi. 2021. Salient ImageNet: How to discover spurious
+     importance weighting for subpopulation shift via uncertainty-aware mixup.                        features in Deep Learning?. In International Conference on Learning Representa-
+     Advances in Neural Information Processing Systems 35 (2022), 37704–37718.                        tions.
+[18] Haibo He and Edwardo A Garcia. 2009. Learning from imbalanced data. IEEE                    [44] Jake Snell, Kevin Swersky, and Richard Zemel. 2017. Prototypical Networks
+     Transactions on knowledge and data engineering 21, 9 (2009), 1263–1284.                          for Few-shot Learning. In Advances in Neural Information Processing Systems.
+[19] Yue He, Zheyan Shen, and Peng Cui. 2021. Towards non-iid image classification:                   4077–4087.
+     A dataset and baselines. Pattern Recognition 110 (2021), 107383.                            [45] F. Sung, Y. Yang, L. Zhang, T. Xiang, P. H. S. Torr, and T. M. Hospedales. 2018.
+[20] Dan Hendrycks, Kevin Zhao, Steven Basart, Jacob Steinhardt, and Dawn Song.                       Learning to Compare: Relation Network for Few-Shot Learning. In IEEE/CVF
+     2021. Natural adversarial examples. In Proceedings of the IEEE/CVF Conference on                 Conference on Computer Vision and Pattern Recognition. 1199–1208.
+     Computer Vision and Pattern Recognition. 15262–15271.                                       [46] Rishabh Tiwari and Pradeep Shenoy. 2023. Overcoming Simplicity Bias in Deep
+[21] Andrew Ilyas, Shibani Santurkar, Dimitris Tsipras, Logan Engstrom, Brandon                       Networks using a Feature Sieve. In International Conference on Machine Learning
+     Tran, and Aleksander Madry. 2019. Adversarial examples are not bugs, they are                    (Proceedings of Machine Learning Research, Vol. 202), Andreas Krause, Emma
+     features. Advances in Neural Information Processing Systems 32 (2019).                           Brunskill, Kyunghyun Cho, Barbara Engelhardt, Sivan Sabato, and Jonathan
+[22] Pavel Izmailov, Polina Kirichenko, Nate Gruver, and Andrew G Wilson. 2022. On                    Scarlett (Eds.). PMLR, 34330–34343.
+     feature learning in the presence of spurious correlations. Advances in Neural               [47] Rishabh Tiwari and Pradeep Shenoy. 2023. Overcoming simplicity bias in deep
+     Information Processing Systems 35 (2022), 38516–38532.                                           networks using a feature sieve. In International Conference on Machine Learning.
+[23] Nayeong Kim, Sehyun Hwang, Sungsoo Ahn, Jaesik Park, and Suha Kwak. 2022.                        PMLR, 34330–34343.
+     Learning debiased classifier with biased committee. Advances in Neural Informa-             [48] Oriol Vinyals, Charles Blundell, Timothy Lillicrap, koray kavukcuoglu, and Daan
+     tion Processing Systems 35 (2022), 18403–18415.                                                  Wierstra. 2016. Matching Networks for One Shot Learning. In Advances in Neural
+
+
+
+
+                                                                                          4533
+Spuriousness-Aware Meta-Learning for Learning Robust Classifiers                                                                KDD ’24, August 25–29, 2024, Barcelona, Spain
+
+
+     Information Processing Systems. 3630–3638.                                                                                       Contexts
+[49] Tan Wang, Chang Zhou, Qianru Sun, and Hanwang Zhang. 2021. Causal attention                                    Class
+     for unbiased visual recognition. In Proceedings of the IEEE/CVF International                                             Validation        Test
+     Conference on Computer Vision. 3091–3100.
+[50] P. Welinder, S. Branson, T. Mita, C. Wah, F. Schroff, S. Belongie, and P. Perona.                                dog       running       in_street
+     2010. Caltech-UCSD Birds 200. Technical Report CNS-TR-2010-001. California                                        cat      on_tree       in_street
+     Institute of Technology.                                                                                         bear      on_tree         white
+[51] Shirley Wu, Mert Yuksekgonul, Linjun Zhang, and James Zou. 2023. Discover                                        bird    on_shoulder     in_hand
+     and Cure: Concept-aware Mitigation of Spurious Correlation. arXiv preprint
+     arXiv:2305.00650 (2023).                                                                                         cow       spotted       standing
+[52] Kai Yuanqing Xiao, Logan Engstrom, Andrew Ilyas, and Aleksander Madry.                                        elephant    in_circus      in street
+     2021. Noise or Signal: The Role of Image Backgrounds in Object Recognition. In                                  horse      running       in_street
+     International Conference on Learning Representations.                                                         monkey      climbing         sitting
+[53] Huaxiu Yao, Yu Wang, Sai Li, Linjun Zhang, Weixin Liang, James Zou, and Chelsea
+     Finn. 2022. Improving out-of-distribution robustness via selective augmentation.                                  rat      running        in_hole
+     In International Conference on Machine Learning. PMLR, 25407–25437.                                             sheep     at_sunset      on_road
+[54] Han-Jia Ye, Hexiang Hu, De-Chuan Zhan, and Fei Sha. 2020. Few-Shot Learning
+     via Embedding Adaptation with Set-to-Set Functions. In IEEE/CVF Conference on               Table 9: Classes and their associated contexts in the NICO
+     Computer Vision and Pattern Recognition. 8808–8817.                                         datasets. Contexts not shown in the table are used in the
+[55] Hongyi Zhang, Moustapha Cisse, Yann N Dauphin, and David Lopez-Paz. 2017.                   training set.
+     mixup: Beyond empirical risk minimization. arXiv preprint arXiv:1710.09412
+     (2017).
+[56] Hongyi Zhang, Moustapha Cisse, Yann N Dauphin, and David Lopez-Paz. 2018.
+     mixup: Beyond Empirical Risk Minimization. In International Conference on Learn-
+     ing Representations.                                                                           NICO [19] is a real-world dataset for out-of-distribution robust-
+[57] Jiawei Zhang, Yang Wang, Piero Molino, Lezhi Li, and David S Ebert. 2018. Man-
+     ifold: A model-agnostic framework for interpretation and diagnosis of machine
+                                                                                                 ness. We used its Animal subset containing 10 object classes and 33
+     learning models. IEEE Transactions on Visualization and Computer Graphics 25, 1             context labels. Following the setting in [4, 47], we split the dataset
+     (2018), 364–373.                                                                            into training, validation, and test sets with each set having unique
+[58] Michael Zhang, Nimit S Sohoni, Hongyang R Zhang, Chelsea Finn, and Christo-
+     pher Re. 2022. Correct-N-Contrast: a Contrastive Approach for Improving Robust-             contexts. Table 9 gives the allocation of the contexts for the 10
+     ness to Spurious Correlations. In International Conference on Machine Learning              classes.
+     (Proceedings of Machine Learning Research, Vol. 162), Kamalika Chaudhuri, Ste-                 The ImageNet-9 dataset [3] is a subset of ImageNet. It has 9
+     fanie Jegelka, Le Song, Csaba Szepesvari, Gang Niu, and Sivan Sabato (Eds.).
+     PMLR, 26484–26516.                                                                          super-classes, i.e., Dog, Cat, Frog, Turtle, Bird, Primate, Fish, Crab,
+[59] Bolei Zhou, Agata Lapedriza, Aditya Khosla, Aude Oliva, and Antonio Torralba.               Insect, which are obtained by merging similar classes from Ima-
+     2017. Places: A 10 million image database for scene recognition. IEEE Transactions
+     on Pattern Analysis and Machine Intelligence 40, 6 (2017), 1452–1464.
+                                                                                                 geNet. ImageNet-A contains real-world images that are challenging
+                                                                                                 to the image classifiers trained on standard ImageNet. We extract
+A APPENDIX                                                                                       images of the 9 super-classes from the ImageNet-A dataset and use
+                                                                                                 these images as the test data.
+A.1 Datasets
+Table 8 depicts detailed statistics for all datasets. For Waterbirds                             A.2     Experimental Details
+and CelebA datasets, we give the number of training, validation,                                    VLM Settings. For both ViT-GPT2 and BLIP, we set the maximum
+and test images in each group specified by classes and attributes.                               length of the sequence to be generated as 16 and the number of
+For example, the group label (landbird, land) in the Waterbirds                                  beams for beam search to 4.
+dataset has 3498 training images which are all landbird and have
+land backgrounds. NICO provides context labels as spurious at-                                      Training Details. We initialize ResNet-50 and ResNet-18 using
+tributes. ImageNet-9 and ImageNet-A datasets do not have clear                                   ImageNet pre-trained weights. Standard data augmentations, i.e.,
+group partitions specified by the class and attribute associations.                              RandomResizedCrop and RandomHorizontalFlip are used during
+                                                                                                 model training. We use an SDG optimizer with a momentum of
+                  Number of                                   Number of images                   0.9 and a weight decay of 10−4 during meta-training. The detailed
+ Dataset                             ⟨class, attribute⟩
+                   classes                                  Train      Val     Test              training configurations are shown in Table 10.
+                                  ⟨landbird, land⟩          3,498      467     2,255
+                                  ⟨landbird, water⟩          184       466     2,255
+                                                                                                 A.3     Baselines
+ Waterbirds             2                                                                        We briefly summarize and describe the baselines which are com-
+                                  ⟨waterbird, land⟩           56       133      642
+                                  ⟨waterbird, water⟩        1,057      133      642              pared in the experiments:
+                                  ⟨non-blond, female⟩       71,629    8,535    9,767             Group DRO [42] proposes to train the models on the worst-case
+                                  ⟨non-blond, male⟩         66,874    8,276    7,535             loss over a set of predefined groups.
+ CelebA                 2
+                                  ⟨blond, female⟩           22,880    2,874    2,480             ReBias [3] proposes a novel framework to train a de-biased rep-
+                                  ⟨blond, male⟩              1,387     182      180              resentation by encouraging it to be different from a set of biased
+ NICO                  10         ⟨object, context ⟩        10298      642      894              representations.
+ ImageNet-9             9        -                          54,600    2,100      -               REx [25] proposes a min-max algorithm to optimize for the worst
+                                                                                                 linear combination of risks on different environments.
+ ImageNet-A             9        -                             -        -      1087
+Table 8: Detailed statistics of the 5 datasets. ⟨class, attribute⟩
+represents a spurious correlation between a class and a spu-
+rious attribute. “-" denotes not applicable.
+
+
+
+
+                                                                                          4534
+KDD ’24, August 25–29, 2024, Barcelona, Spain                                                               Guangtao Zheng, Wenqian Ye, & Aidong Zhang
+
+
+                                                 Learning rate     Number of tasks                                   Model selection
+                 Dataset        Learning rate                                           Training epochs       τ
+                                                   scheduler         per epoch                                          metric
+              Waterbirds              1e-3      Cosine Annealing           80                  100            5           Accpu
+                CelebA                1e-3      Cosine Annealing           80                  100            5           Accpu
+                NICO                  5e-3      Cosine Annealing           80                   50           10    Validation accuracy
+              ImageNet-9              1e-3      Cosine Annealing           80                   50           50    Validation accuracy
+Table 10: Hyperparameter settings and model selection criteria for SPUME training on the Waterbirds, CelebA, NICO, and
+ImageNet-9 datasets. Accpu denotes pseudo unbiased validation accuracy.
+
+
+
+LfF [31] proposes a failure-based debiasing scheme by training a             higher layers of the network to extract and utilize more meaningful
+pair of neural networks: the first network to be biased by repeatedly        representations.
+amplifying its “prejudice" and debias the training of the second
+network by focusing on samples that counter the first network.               A.4     Analyzing the Effects of Using VLMs
+CVaR DRO [27] is an algorithm for distributionally robust opti-                 Using the Outputs of VLMs as Regularization. We added a linear
+mization of convex losses with conditional value at risk (CVaR) and          layer with weights WA ∈ R | A |×D and bias bA ∈ R | A | after the
+χ 2 divergence uncertainty sets.                                             backbone to predict the detected attributes for each image, i.e.,
+JTT [29] proposes a simple two-stage approach that first trains a                                                       Õ
+                                                                                θ˜ = arg min E(x,y)∈ Dtr ℓ(fθ (x), y) +       ℓ ′ (fθ′′ (x), a) (11)
+standard ERM model and then trains a second model by upweight-                            θ
+                                                                                                                       a ∈ψ (ϕ(x ))
+ing the training examples misclassified by the first model.
+DFR [24] retrains the last linear layer on a small held-out dataset          where fθ ′ (x) = WAhθ 1 (x)+bA , and ℓ ′ (·, ·) is the binary entropy loss
+                                                                                     ′
+
+with balanced groups of data.                                                function. We trained the whole model on the Waterbirds and CelebA
+CaaM [49] learns causal features that are robust in any confound-            datasets, respectively. If the attributes contain information effective
+ing context and self-annotates the confounders in an unsupervised            in improving a classifier’s robustness to spurious correlations, we
+fashion.                                                                     will observe improved performance after training. However, the
+LWBC / SSL+ERM [23] employs a committee of classifiers as an                 worst-group accuracies on the Waterbirds and CelebA datasets are
+auxiliary module that identifies bias-conflicting data and assigns           71.7% and 47.2%, respectively, which are only slightly better than
+large weights to them when training the main classifier. SSL+ERM             those of ERM and fall far behind the results of SPUME. Therefore,
+is another approach proposed in this paper that uses self-supervised         the detected attributes from the VLM alone do not contain infor-
+representation as the frozen backbone of the committee and the               mation effective for improving a classifier’s robustness to spurious
+main classifier.                                                             correlations.
+MaskTune [2] employs an interpretation-based masking strat-                     Directly Using VLMs for Predictions. Although the goal of this
+egy that mitigates over-reliance on spurious features. It forces the         paper is to learn a classic and resource-light classifier that is robust
+trained model to explore new features during a single epoch fine-            to spurious correlations, we explored the scenario when BLIP is
+tuning by masking previously discovered features.                            directly used for prediction with modifications on the inference par-
+DivDis [26] is a simple two-stage framework for identifying and              adigm. Specifically, we used text embeddings of the sentences with
+resolving ambiguity in data. It first learns a diverse set of hypotheses     the template “a photo of class_label" (“a person with hair_color
+and then disambiguates them by selecting one of the discovered               hair" for CelebA) from BLIP as the classifier weights and calcu-
+functions using additional information (e.g. target labels).                 lated the cosine similarity between an image embedding and these
+JiGen [7] jointly classifies objects and solves unsupervised jigsaw          weights in the shared embedding space of BLIP. We predicted the
+tasks.                                                                       label such that its corresponding sentence has the highest similar-
+Mixup [55] trains a neural network on convex combinations of                 ity to the image embedding. The worst group accuracies on the
+pairs of examples and their labels to alleviate memorization and             Waterbirds and CelebA datasets are 1.17% and 29.71% respectively.
+sensitivity to adversarial examples in deep neural networks.                 The average accuracies on the NICO, ImageNet-9, and ImageNet-A
+CNBB [19] is a non-independent and identically distributed (Non-             datasets are 14.30%, 13.43%, and 9.20%, respectively. Directly using
+I.I.D) learning method that is based on batch balancing inspired by          the VLM without carefully tuning the inference pipeline performs
+causal inference.                                                            much worse than our proposed method. In contrast, our proposed
+DecAug [4] proposes a semantic augmentation and feature decom-               method SPUME exploits the attributes provided by VLMs in a novel
+position approach to disentangle context features from category-             way for significant improvement in the robustness of a classifier to
+related features.                                                            spurious correlations.
+SIFER [46] automatically identifies and suppresses easily-computable
+spurious features in lower layers of the network and allows the
+
+
+
+
+                                                                      4535
+

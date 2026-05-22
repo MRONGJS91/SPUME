@@ -1,0 +1,44 @@
+use_val: False
+use_group_label: False
+fast_train: 32
+init_use_all: True
+init_batch_size: 128
+init_num_workers: 0
+random_sampler: False
+pretrained: True
+test: False
+
+batch_size: 32
+num_supp: 4
+num_query: 4
+topk: 1
+num_epochs: 1
+num_episode: 10
+task_num: 1
+n_classes: 4
+
+vlm: "blip"
+dataset: "spawrious_o2o_easy"
+backbone: "resnet18"
+score_func: "tanh-abs-log"
+scheduler: "cosine"
+milestones: [20, 40, 60, 80]
+gamma: 0.2
+alpha: 1.0
+lr: 1.e-3
+augmentation: True
+temp: 5.0
+val_threshold_num: 10
+tag: "blip_spume_smoke"
+
+save_folder: "d:/SPUME/how_to_run/meta_spurious_exprs/"
+data_folder: "d:/SPUME/spawrious224__o2o_easy"
+metadata_path: "d:/SPUME/SPUME-master/data/spawrious_o2o_easy_metadata.csv"
+vit_gpt2_attr_embed_path: "d:/SPUME/spawrious224__o2o_easy/vit-gpt2_extracted_concepts_0_0_img_embeddings.pickle"
+vit_gpt2_vocab_path: "d:/SPUME/spawrious224__o2o_easy/vit-gpt2_extracted_concepts_0_0_vocab.pickle"
+blip_attr_embed_path: "d:/SPUME/spawrious224__o2o_easy/blip_extracted_concepts_0_0_img_embeddings.pickle"
+blip_vocab_path: "d:/SPUME/spawrious224__o2o_easy/blip_extracted_concepts_0_0_vocab.pickle"
+num_workers: 0
+meta_chunk_size: 2
+amp: True
+use_checkpoint: True

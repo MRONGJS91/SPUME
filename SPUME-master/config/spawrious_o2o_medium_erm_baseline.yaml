@@ -1,0 +1,42 @@
+use_val: False
+use_group_label: False
+fast_train: 0
+random_sampler: False
+pretrained: True
+test: False
+
+batch_size: 32
+num_supp: 2
+num_query: 2
+topk: 1
+num_epochs: 5
+num_episode: 1
+task_num: 1
+n_classes: 4
+img_size: 224
+
+vlm: "vit-gpt2"
+dataset: "spawrious_o2o_medium"
+backbone: "resnet18"
+score_func: "tanh-abs-log"
+scheduler: "cosine"
+milestones: [2, 4]
+gamma: 0.2
+alpha: 1.0
+lr: 1.e-3
+augmentation: True
+temp: 5.0
+val_threshold_num: 10
+tag: "erm_medium"
+
+save_folder: "d:/SPUME/how_to_run/meta_spurious_exprs/"
+data_folder: "d:/SPUME/spawrious224__o2o_medium"
+metadata_path: "d:/SPUME/SPUME-master/data/spawrious_o2o_medium_metadata.csv"
+vit_gpt2_attr_embed_path: ""
+vit_gpt2_vocab_path: ""
+blip_attr_embed_path: ""
+blip_vocab_path: ""
+num_workers: 0
+
+train_method: "erm"
+mixup_alpha: 0.0

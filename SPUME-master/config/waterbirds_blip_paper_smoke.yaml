@@ -1,0 +1,40 @@
+use_val: False
+use_group_label: False
+fast_train: 0
+random_sampler: False
+pretrained: True
+test: False
+
+batch_size: 8
+num_supp: 10
+num_query: 10
+topk: 1
+num_epochs: 1
+num_episode: 80
+task_num: 1
+n_classes: 2
+
+vlm: "blip"
+dataset: "waterbirds"
+backbone: "resnet50"
+score_func: "tanh-abs-log"
+scheduler: "cosine"
+milestones: [20, 40, 60, 80]
+gamma: 0.2
+alpha: 1.0
+lr: 1.e-3
+augmentation: True
+temp: 5.0
+val_threshold_num: 50
+tag: "paper_blip_smoke"
+
+save_folder: "d:/SPUME/how_to_run/meta_spurious_exprs/"
+data_folder: "d:/SPUME/waterbird_complete95_forest2water2"
+vit_gpt2_attr_embed_path: "d:/SPUME/waterbird_complete95_forest2water2/images/vit-gpt2_img_embeddings.pickle"
+vit_gpt2_vocab_path: "d:/SPUME/waterbird_complete95_forest2water2/images/vit-gpt2_vocab.pickle"
+blip_attr_embed_path: "d:/SPUME/waterbird_complete95_forest2water2/images/blip_img_embeddings.pickle"
+blip_vocab_path: "d:/SPUME/waterbird_complete95_forest2water2/images/blip_vocab.pickle"
+num_workers: 0
+meta_chunk_size: 2
+amp: True
+use_checkpoint: True

@@ -1,0 +1,26 @@
+# MetaShift Cat-vs-Dog Mixup baseline
+#
+# Usage:
+#   python pretrain.py --config configs/metashift/metashift_catdog_mixup_baseline.yaml
+
+dataset: metashift_catdog
+data_folder: D:\SPUME\datasets\metashift
+metadata_path: D:\SPUME\datasets\metashift\metadata_catdog.csv
+backbone: resnet50
+pretrained: true
+n_classes: 2
+batch_size: 64
+lr: 1.e-3
+num_epochs: 50
+weight_decay: 1.e-4
+scheduler: cosine
+augmentation: true
+train_method: mixup
+mixup_alpha: 0.2
+use_val: true
+test: false
+num_workers: 4
+seed: 100
+n_gpu: 1
+tag: metashift_catdog_mixup
+save_folder: D:\SPUME\how_to_run\meta_spurious_exprs

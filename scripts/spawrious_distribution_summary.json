@@ -1,0 +1,53 @@
+[
+  {
+    "dataset": "spawrious_o2o_easy",
+    "train_samples": 60816,
+    "test_samples": 7632,
+    "classes": [
+      "bulldog",
+      "corgi",
+      "dachshund",
+      "labrador"
+    ],
+    "backgrounds": [
+      "beach",
+      "desert",
+      "dirt",
+      "jungle",
+      "snow"
+    ],
+    "marginal_background_js": 0.0,
+    "per_class_js": {
+      "bulldog": 0.0,
+      "corgi": 0.0,
+      "dachshund": 0.0,
+      "labrador": 0.0
+    }
+  },
+  {
+    "dataset": "spawrious_o2o_medium",
+    "train_samples": 60816,
+    "test_samples": 7632,
+    "classes": [
+      "bulldog",
+      "corgi",
+      "dachshund",
+      "labrador"
+    ],
+    "backgrounds": [
+      "beach",
+      "desert",
+      "dirt",
+      "jungle",
+      "mountain",
+      "snow"
+    ],
+    "marginal_background_js": 0.0,
+    "per_class_js": {
+      "bulldog": 0.0,
+      "corgi": 0.0,
+      "dachshund": 0.0,
+      "labrador": 0.0
+    }
+  }
+]

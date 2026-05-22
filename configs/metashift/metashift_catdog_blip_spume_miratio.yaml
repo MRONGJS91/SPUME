@@ -1,0 +1,42 @@
+# MetaShift Cat-vs-Dog SPUME full run with BLIP concepts
+
+dataset: metashift_catdog
+data_folder: D:\SPUME\datasets\metashift
+metadata_path: D:\SPUME\datasets\metashift\metadata_metashift_catdog.csv
+backbone: resnet50
+pretrained: true
+n_classes: 2
+batch_size: 8
+num_supp: 10
+num_query: 10
+num_epochs: 30
+num_episode: 80
+task_num: 1
+topk: 10
+vlm: blip
+score_func: mi-ratio
+scheduler: cosine
+alpha: 1.0
+lr: 1.e-3
+augmentation: true
+temp: 5.0
+use_val: true
+use_group_label: false
+random_sampler: false
+fast_train: false
+test: false
+amp: true
+use_checkpoint: true
+meta_chunk_size: 2
+val_threshold_num: 100
+num_workers: 0
+seed: 100
+n_gpu: 1
+tag: metashift_catdog_blip_spume_miratio
+save_folder: D:\SPUME\how_to_run\meta_spurious_exprs
+
+# --- BLIP concept embeddings (from SPUME extract_concepts.py) ---
+vit_gpt2_attr_embed_path: D:\SPUME\datasets\metashift\blip_extracted_concepts_0_0_img_embeddings.pickle
+vit_gpt2_vocab_path: D:\SPUME\datasets\metashift\blip_extracted_concepts_0_0_vocab.pickle
+blip_attr_embed_path: D:\SPUME\datasets\metashift\blip_extracted_concepts_0_0_img_embeddings.pickle
+blip_vocab_path: D:\SPUME\datasets\metashift\blip_extracted_concepts_0_0_vocab.pickle

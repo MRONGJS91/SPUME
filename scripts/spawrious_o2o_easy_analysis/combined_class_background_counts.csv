@@ -1,0 +1,9 @@
+,class_name,beach,desert,dirt,jungle,snow
+train_count,bulldog,5068,5068,5068,0,0
+train_count,corgi,5068,0,0,5068,5068
+train_count,dachshund,5068,0,0,5068,5068
+train_count,labrador,5068,5068,5068,0,0
+test_count,bulldog,636,636,636,0,0
+test_count,corgi,636,0,0,636,636
+test_count,dachshund,636,0,0,636,636
+test_count,labrador,636,636,636,0,0

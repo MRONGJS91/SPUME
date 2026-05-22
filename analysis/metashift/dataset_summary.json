@@ -1,0 +1,14 @@
+{
+  "total_images": 19236,
+  "classes": [
+    "cat",
+    "dog"
+  ],
+  "n_contexts": 153,
+  "split_counts": {
+    "test": 13447,
+    "train": 4676,
+    "val": 1113
+  },
+  "unique_groups": 234
+}
